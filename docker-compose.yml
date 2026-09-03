@@ -1,20 +1,20 @@
 version: '3.8'
 
 services:
-  app:
+  # --- Servidor Web / API ---
+  api-flask:
     build: .
     container_name: api-flask
     restart: always
     environment:
       - DB_HOST=servidor-bd-ejemplo
-      - DB_USER=user_app
-      - DB_PASSWORD=secure_password
+      - DB_USER=root
+      - DB_PASSWORD=root_password
       - DB_NAME=app_db
-    depends_on:
-      - servidor-bd-ejemplo
     networks:
-      - app-net
+      - sre-network
 
+  # --- Base de Datos ---
   servidor-bd-ejemplo:
     image: mysql:8.0
     container_name: servidor-bd-ejemplo
@@ -22,13 +22,14 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: app_db
-      MYSQL_USER: user_app
-      MYSQL_PASSWORD: secure_password
+    ports:
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - app-net
+      - sre-network
 
+  # --- Proxy Inverso / HTTPS ---
   npm:
     image: 'jc21/nginx-proxy-manager:latest'
     container_name: npm
@@ -41,11 +42,36 @@ services:
       - ./npm/data:/data
       - ./npm/letsencrypt:/etc/letsencrypt
     networks:
-      - app-net
+      - sre-network
+
+  # --- Observabilidad: Uptime Kuma ---
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: always
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime-kuma-data:/app/data
+    networks:
+      - sre-network
+
+  # --- Observabilidad: Dozzle (Viewer de Logs) ---
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - sre-network
 
 networks:
-  app-net:
+  sre-network:
     driver: bridge
 
 volumes:
   mysql_data:
+  uptime-kuma-data:
