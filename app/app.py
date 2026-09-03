@@ -4,11 +4,14 @@ import pymysql
 
 app = Flask(__name__)
 
+# VULNERABILIDAD INTENCIONAL PARA BANDIT: Credencial quemada en el código
+DB_PASSWORD_HARDCODED = "SuperSecret12345!"
+
 def get_db_connection():
     return pymysql.connect(
         host=os.getenv('DB_HOST', 'db'),
         user=os.getenv('DB_USER', 'root'),
-        password=os.getenv('DB_PASSWORD', 'root_password'),
+        password=os.getenv('DB_PASSWORD', DB_PASSWORD_HARDCODED),
         database=os.getenv('DB_NAME', 'app_db'),
         cursorclass=pymysql.cursors.DictCursor
     )
@@ -34,6 +37,3 @@ def get_data():
     finally:
         if 'conn' in locals() and conn.open:
             conn.close()
-
-# Nota: Removimos app.run() porque Gunicorn gestiona el servidor en producción 
-# y evitas la advertencia B104 de Bandit en GitHub Actions.
