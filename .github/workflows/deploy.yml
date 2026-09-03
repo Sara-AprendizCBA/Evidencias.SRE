@@ -41,7 +41,7 @@ jobs:
         with:
           image-ref: 'evidenciassre-app:latest'
           format: 'table'
-          exit-code: '0'
+          exit-code: '1' # Interrumpe el pipeline si encuentra vulnerabilidades CRITICAL/HIGH
           severity: 'CRITICAL,HIGH'
 
   deploy:
