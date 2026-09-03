@@ -12,23 +12,28 @@ def get_db_connection():
         database=os.getenv('DB_NAME', 'app_db'),
         cursorclass=pymysql.cursors.DictCursor
     )
+
 @app.route('/')
 def home():
-    return {"message": "API Flask funcionando correctamente"}, 200
+    return jsonify({"message": "API Flask funcionando correctamente"}), 200
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "OK"}), 200
 
 @app.route('/api/v1/data', methods=['GET'])
 def get_data():
-    conn = get_db_connection()
     try:
+        conn = get_db_connection()
         with conn.cursor() as cursor:
             cursor.execute("SELECT VERSION() AS version;")
             result = cursor.fetchone()
             return jsonify({"status": "success", "db_version": result['version']}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
     finally:
-        conn.close()
+        if 'conn' in locals() and conn.open:
+            conn.close()
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+# Nota: Removimos app.run() porque Gunicorn gestiona el servidor en producción 
+# y evitas la advertencia B104 de Bandit en GitHub Actions.
