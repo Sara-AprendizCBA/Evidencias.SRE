@@ -5,8 +5,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app/ ./app/
+# Copia todo el contenido del proyecto (incluida la carpeta app/)
+COPY . .
 
+# Ajustar PYTHONPATH para que Python reconozca el módulo app.main
+ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app.main:app"]
