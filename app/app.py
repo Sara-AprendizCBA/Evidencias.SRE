@@ -1,4 +1,5 @@
 import os
+import subprocess
 from flask import Flask, jsonify
 import pymysql
 
@@ -6,6 +7,10 @@ app = Flask(__name__)
 
 # VULNERABILIDAD INTENCIONAL PARA BANDIT: Credencial quemada en el código
 DB_PASSWORD_HARDCODED = "SuperSecret12345!"
+
+# VULNERABILIDAD INTENCIONAL PARA BANDIT: ejecución de comandos con shell
+def funcion_insegura(comando):
+    return subprocess.Popen(comando, shell=True)
 
 def get_db_connection():
     return pymysql.connect(
