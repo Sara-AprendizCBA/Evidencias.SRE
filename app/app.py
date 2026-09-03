@@ -12,7 +12,9 @@ def get_db_connection():
         database=os.getenv('DB_NAME', 'app_db'),
         cursorclass=pymysql.cursors.DictCursor
     )
-
+@app.route('/')
+def home():
+    return {"message": "API Flask funcionando correctamente"}, 200
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "OK"}), 200
