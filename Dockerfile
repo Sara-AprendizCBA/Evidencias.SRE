@@ -12,4 +12,4 @@ COPY . .
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app.main:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app.app:app"]
